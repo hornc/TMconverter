@@ -38,10 +38,10 @@ class TM:
             if trans.startswith('halt'):
                 self.halt.add(trans)
             self.writes.add(' '.join(row[2:5]))
-        print('reads', self.reads)
 
         self.state.discard('*')
         self.symbol.discard('*')
+        self.symbol.discard('0')
         self.symbol = list(self.symbol)
         self.symbol.sort(key=key_sort)
         for row in self.source:
@@ -86,7 +86,6 @@ class TM:
             tape = tape[4:]
         return out
 
-
     def translate(self, tape):
         out = ''
         d = self.makedict(2)
@@ -103,6 +102,7 @@ class TM:
         assert len(rule) == 5
         assert '*' not in rule[0]
         assert '*' not in rule[4]
+        assert 'halt' not in rule[0]
         self.rules.add(' '.join(rule))
 
     def convert(self, target=2):
@@ -132,16 +132,20 @@ class TM:
 
             for os in ostate:
                 if nstate == '*':
-                    ns = os
+                    ns = f'{os}.{owrite}{ndir}1'
+                elif 'halt' in nstate:
+                    ns = 'halt'
                 else:
-                    ns = nstate
+                    ns = f'{nstate}.{owrite}{ndir}1'
                 assert os != '*'
-                r = [os + '.' + word[:-1], word[-1], write[-1], 'l', ns + f'.{owrite}{ndir}1']
+                r = [os + '.' + word[:-1], word[-1], write[-1], 'l', ns]
                 self.addrule(r)
 
         for write in self.writes:
             write = write.split()
             nstate = write[-1]
+            if 'halt' in nstate:
+                continue
             ndir = write[1]
             s = write[0]
             word = d[s]
@@ -150,8 +154,6 @@ class TM:
                     nlabel = f'{nstate}{ndir}'
                 else:
                     nlabel = nstate + f'.{s}{ndir}{i+2}'
-                if 'halt' in nlabel:
-                    nlabel = 'halt'
                 ns = ('0', '1') if nstate == '*' else nstate
                 for n in ns:
                     self.addrule([n + f'.{s}{ndir}{i+1}', '*', word[-(i+2)], 'l', nlabel.replace('*', n)])
@@ -165,9 +167,12 @@ class TM:
                 m = 6 
             for i in range(1, m):
                 clabel = nstate + ndir + ('' if i == 1 else str(i))
+                if 'halt' in clabel:
+                    continue
                 nlabel = nstate if i == (m-1) else (nstate + ndir + str(i+1))
                 self.addrule([clabel, '*', '*', ndir, nlabel])
-            
+        self.rules = list(self.rules)
+        self.rules.sort()
         print('\n'.join(self.rules))
 
 
@@ -214,8 +219,9 @@ def main():
         print('\t'.join([str(v) for v in row]))
 
     # Do the conversion...
-    print('DICT', orig.makedict(target))
-    orig.convert(target)
+    if symbol != target:
+        print('DICT', orig.makedict(target))
+        orig.convert(target)
 
     if args.input:
         print('TAPE', orig.translate(args.input))
