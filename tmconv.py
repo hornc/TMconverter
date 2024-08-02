@@ -17,8 +17,9 @@ class TM:
     def __init__(self, f):
         self.source = []
         for line in f:
-            line = re.sub(r';.*', '', line)
-            self.source.append(line.strip().split())
+            line = re.sub(r';.*', '', line).strip()
+            if line:
+               self.source.append(line.split())
         self.count_current()
         self.rules = set()
 

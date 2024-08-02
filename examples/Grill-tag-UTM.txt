@@ -1,0 +1,24 @@
+; Source: https://esolangs.org/wiki/Grill_Tag#Turing_machine_implementation
+0 e e r 1
+0 P p l 0
+1 P p r 1
+0 p P l 0
+1 p q r 0
+0 q P r 1
+* > < r *
+0 < > l 0
+1 < < l 0
+0 i a r 0
+1 i < l 1
+0 I A r 0
+1 I < r 0
+0 a x l 0
+1 a i l 1
+0 A X l 0
+1 A I l 1
+* X a r *
+* x A r *
+0 _ o l 0
+1 _ _ l halt
+0 o _ l 1
+1 o A r 0
