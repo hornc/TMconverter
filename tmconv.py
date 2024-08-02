@@ -68,10 +68,9 @@ class TM:
         return reads, len(self.writes), len(self.moves)
 
     def makedict(self, target=2):
-        print(f'Symbols: {self.symbol}')
+        #print(f'Symbols: {self.symbol}')
         w = ceil(log(len(self.symbol), target))
         d = {v: bin(i)[2:].zfill(w).replace('0', '_') for i,v in enumerate(self.symbol)}
-        #print(d)
         return d
 
     def rev_trans(self, tape):
@@ -180,7 +179,7 @@ def conv(n, m, h=1, t=2):
     # n states, m symbols, assumes a strongly universal UTM with 1 halt state
     r = n * m  # assume maximal read cases
     w = ceil(log(m, t))  # word width of orig. symbols in new symbols
-    return r * (w + 2*(w - 1)) - h * (w - 1)
+    return r + ((n * m) - h) * (w - 1) + w * 2 * n
 
 
 def main():
@@ -200,7 +199,7 @@ def main():
     expected_states = conv(state, symbol, h=halt, t=target)
     reads, writes, moves = orig.classes()
     print(f'This is a {state} state, {symbol} symbol machine with {halt} halt state(s).')
-    print(f'To convert to a {target} symbol machine we can exepct a ({expected_states}, {target}) result.')
+    print(f'To convert to a {target} symbol machine we can expect a ({expected_states}, {target}) result.')
 
     w = ceil(log(symbol, target))
     print(f'\nTarget word size: {w} symbols')
@@ -209,7 +208,7 @@ def main():
     e_writes = state * symbol  # we probably expect less?
     e_moves = directions * state + halt
     table = [
-              ['', 'Expected', 'Actual'],
+              ['', 'Expect', 'Actual'],
               ['reads', e_reads, reads],
               ['writes', e_writes, writes],
               ['moves', e_moves, moves],
@@ -217,17 +216,17 @@ def main():
     print()
     for row in table:
         print('\t'.join([str(v) for v in row]))
+    print()
 
     # Do the conversion...
     if symbol != target:
-        print('DICT', orig.makedict(target))
         orig.convert(target)
 
     if args.input:
-        print('TAPE', orig.translate(args.input))
+        print('\nTAPE:', orig.translate(args.input))
 
     if args.conv:
-        print('CONVERT BACK', orig.rev_trans(args.conv))
+        print('CONVERT BACK:', orig.rev_trans(args.conv))
 
 
 if __name__ == '__main__':
