@@ -1,0 +1,12 @@
+; from https://bbchallenge.org/1RB1LC_1RC1RB_1RD0LE_1LA1LD_1RZ0LA
+
+A _ 1 r B
+A 1 1 l C
+B _ 1 r C
+B 1 1 r B
+C _ 1 r D
+C 1 _ l E
+D _ 1 l A
+D 1 1 l D
+E _ 1 r halt
+E 1 _ l A
