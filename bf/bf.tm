@@ -35,15 +35,13 @@ codefound > _ r command
 c1 * * r codefound
 
 
-
-
 ; commands
 command + + r incadv
 command > > r fwdadv  ; advance the pointer on a advance dp command
 command - - r decadv
 command < < r retadv
 command [ [ r braadv
-command _ _ r endadv  ; should we advance here?
+command _ _ l endret  ; on ], retreat the IP, in case we need to repeat left
 
 
 incadv _ > l inc1  ; set PC to next instruction
@@ -51,7 +49,7 @@ fwdadv _ > l fwd1
 decadv _ > l dec1
 retadv _ > l ret1
 braadv _ > l bra1  ; bracket test
-endadv _ > l end1  ; end bracket test
+endret _ > l end1  ; end bracket test
 
 ; move leftwards through the program to start of tape
 inc1 * * l inc2
@@ -216,22 +214,61 @@ efd4 _ _ l endfinddp  ; keep searching left
 endtestcell _ _ r et1  ;  a not set
 et1 _ _ r et2    ; a b not set
 ; a set, repeat loop
-et1 > > r repeatloop
-et1 < < r repeatloop
-et1 + + r repeatloop
-et1 - - r repeatloop
-et1 . . r repeatloop
-et1 , , r repeatloop
-et1 [ [ r repeatloop
+et1 > > r rl2
+et1 < < r rl2
+et1 + + r rl2
+et1 - - r rl2
+et1 . . r rl2
+et1 , , r rl2
+et1 [ [ r rl2
 
 et2 _ _ r r1    ; a b c not set , don't repeat loop
 ; b set, repeat loop
-et2 > > r repeatloop
-et2 < < r repeatloop
-et2 + + r repeatloop
-et2 - - r repeatloop
-et2 . . r repeatloop
-et2 , , r repeatloop
-et2 [ [ r repeatloop
+et2 > > r rl3
+et2 < < r rl3
+et2 + + r rl3
+et2 - - r rl3
+et2 . . r rl3
+et2 , , r rl3
+et2 [ [ r rl3
+
+; repeatloop is for when a ] was encountered, and we are not ready to exit the loop
+; go back to IP, and search left for matching [ to repeat.
+
+; this is a copy of return within the state of needing to repeat a loop
+repeatloop * * r rl1
+rl1 * * r rl2
+rl2 * * r rl3
+rl3 * * r rl4
+rl4 < < r rlc0
+rl4 _ _ r repeatloop
+
+
+; running, move to current IP
+rlc0 _ _ r rlcodefound
+rlcodefound _ _ r rlc1
+rlcodefound > _ l rlcf1
+rlc1 * * r rlcodefound
+
+; searching left for [] as part of our looking for a loop to repeat state
+; rlsearchleft
+; not interested in these values, keep looking
+rlcf1 > > l rlcf2
+rlcf1 < < l rlcf2
+rlcf1 + + l rlcf2
+rlcf1 - - l rlcf2
+rlcf1 . . l rlcf2
+rlcf1 , , l rlcf2
+
+rlcf2 _ _ l rlcf1
+; these are the loop symbols we care about:
+rlcf1 [ [ l rlfoundstart
+rlcf1 _ _ l rlfoundend
+
+; rlfoundstart
+; mark pos, then check whether nested counter is non-zero...
+; if zero, we've found the start
+; if non-zero, substract 1 and go back to looking
+rlfoundstart * > l rlchecknested
 
 
