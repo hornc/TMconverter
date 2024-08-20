@@ -5,6 +5,9 @@ from math import ceil, log
 
 
 ALPHABET = '_123456789ABCDEF'
+EDGELIST = 'tm_edgelist.csv'
+NODELIST = 'tm_nodelist.csv'
+MOVE = {'r': 'Right', 'l': 'Left'}
 
 # tape = 'eppPPPpPpppppPPPq*<>IIiIIi'
 
@@ -174,6 +177,52 @@ class TM:
         self.rules.sort()
         print('\n'.join(self.rules))
 
+    def graph(self, fmt):
+        """
+        Convert machine into a graph format fmt
+        1: basic Gephi CSV
+        """
+        # Nodes
+        # Id,Label
+        nodes = {'halt': '0'}
+        with open(NODELIST, 'w') as f:
+            print(f'Writing Nodes to {NODELIST}...')
+            f.write(','.join(['Id', 'Label']) + '\n')
+            f.write(f'0,"halt"\n')  # HALT at id = 0
+            for i, state in enumerate(self.state, 1):
+                f.write(','.join([str(i), f'"{state}"']) + '\n')
+                nodes[state] = str(i)
+
+        # Edges
+        # Source,Target | Weight , Type
+        with open(EDGELIST, 'w') as f:
+            print(f'Writing Edges to {EDGELIST}...')
+            # CSV edges header:
+            f.write(','.join(['Source', 'Target', 'Label', 'Move', 'Read', 'Write', 'R:W']) + '\n')
+            for transition in self.source:
+                #print(transition)
+                s, read, write, dir_, dest = transition
+                if s == '*':
+                    for n in self.state:
+                        self.ewrite(f, nodes[n], read, write, dir_, nodes[n] if dest == '*' else nodes[dest])
+                #elif dest == '*':
+                #    for n in self.state:
+                #        self.ewrite(f, nodes[s], read, write, MOVE[dir_], nodes[n])
+                elif dir_ == '*':
+                    for d in MOVE.values():
+                        self.ewrite(f, nodes[s], read, write, d, nodes[dest])
+                else:
+                    self.ewrite(f, nodes[s], read, write, dir_, nodes[dest])
+
+    def ewrite(self, f, source, read, write, dir_, target):
+        """
+        Write out an edge definition to file f
+            'Source', 'Target', 'Label', 'Move', 'Read', 'Write', 'R:W'
+        """
+        edge_label = f'{read}:{write}:{dir_.upper()}'
+        f.write(','.join([source, target, edge_label, MOVE[dir_], read, write, f'"{read}:{write}"']) + '\n')
+
+
 
 def conv(n, m, h=1, t=2):
     # n states, m symbols, assumes a strongly universal UTM with 1 halt state
@@ -188,6 +237,7 @@ def main():
     parser.add_argument('--target', '-t', help='Target number of symbols to convert to', type=int, default=2)
     parser.add_argument('--input', '-i', help='Input starting string')
     parser.add_argument('--conv', '-c', help='Convert back tape')
+    parser.add_argument('--graph', '-g', help='Convert machine to Gephi graph format (mode=1, 2, or 3)', type=int)
     args = parser.parse_args()
 
     f = args.file
@@ -217,6 +267,10 @@ def main():
     for row in table:
         print('\t'.join([str(v) for v in row]))
     print()
+
+    if fmt := args.graph:
+        print(f'Output machine as graph format {fmt}...')
+        orig.graph(fmt)
 
     # Do the conversion...
     if symbol != target:
