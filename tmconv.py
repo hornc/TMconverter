@@ -197,26 +197,30 @@ class TM:
         # Source,Target | Weight , Type
         with open(EDGELIST, 'w') as f:
             print(f'Writing Edges to {EDGELIST}...')
-            f.write(','.join(['Source', 'Target', 'Label', 'Move']) + '\n')
+            # CSV edges header:
+            f.write(','.join(['Source', 'Target', 'Label', 'Move', 'Read', 'Write', 'R:W']) + '\n')
             for transition in self.source:
                 #print(transition)
                 s, read, write, dir_, dest = transition
-                edge_label = f'{read}:{write}:{dir_}'
                 if s == '*':
                     for n in self.state:
-                        if dest == '*':
-                            target = nodes[n]
-                        else:
-                            target = nodes[dest]
-                        f.write(','.join([nodes[n], target, edge_label, MOVE[dir_]]) + '\n')
+                        self.ewrite(f, nodes[n], read, write, dir_, nodes[n] if dest == '*' else nodes[dest])
                 #elif dest == '*':
                 #    for n in self.state:
-                #        f.write(','.join([nodes[s], nodes[n], edge_label, MOVE[dir_]]) + '\n')
+                #        self.ewrite(f, nodes[s], read, write, MOVE[dir_], nodes[n])
                 elif dir_ == '*':
                     for d in MOVE.values():
-                        f.write(','.join([nodes[s], nodes[dest], edge_label, d]) + '\n')
+                        self.ewrite(f, nodes[s], read, write, d, nodes[dest])
                 else:
-                    f.write(','.join([nodes[s], nodes[dest], edge_label, MOVE[dir_]]) + '\n')
+                    self.ewrite(f, nodes[s], read, write, dir_, nodes[dest])
+
+    def ewrite(self, f, source, read, write, dir_, target):
+        """
+        Write out an edge definition to file f
+            'Source', 'Target', 'Label', 'Move', 'Read', 'Write', 'R:W'
+        """
+        edge_label = f'{read}:{write}:{dir_.upper()}'
+        f.write(','.join([source, target, edge_label, MOVE[dir_], read, write, f'"{read}:{write}"']) + '\n')
 
 
 
