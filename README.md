@@ -39,5 +39,5 @@ TAPE: 1___1_111_11_1_1_1_1_1_11_11_1_11_111_111_111_111_11_1_1_1_1_1_111__*___1_
 ## Online interpeter
 
 These can be run on an [online simulator](https://github.com/awmorp/turing)
-* original [(2, 14) UTM](examples/Grill-tag-UTM.txt): http://morphett.info/turing/turing.html?a2b2c66cbda6a5b2ddce0476ac390bf3
-* converted [(107, 2) UTM](examples/conversion.txt): http://morphett.info/turing/turing.html?711e664dfcef99a76437560206112835
+* original [(2, 14) UTM](examples/Grill-Tag-2_14-UTM.txt): http://morphett.info/turing/turing.html?a2b2c66cbda6a5b2ddce0476ac390bf3
+* converted [(107, 2) UTM](examples/Grill-Tag-107_2-conversion.txt): http://morphett.info/turing/turing.html?711e664dfcef99a76437560206112835
