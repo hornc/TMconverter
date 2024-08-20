@@ -5,8 +5,9 @@ from math import ceil, log
 
 
 ALPHABET = '_123456789ABCDEF'
-NODELIST = 'tm_nodelist.csv'
 EDGELIST = 'tm_edgelist.csv'
+NODELIST = 'tm_nodelist.csv'
+MOVE = {'r': 'Right', 'l': 'Left'}
 
 # tape = 'eppPPPpPpppppPPPq*<>IIiIIi'
 
@@ -196,7 +197,7 @@ class TM:
         # Source,Target | Weight , Type
         with open(EDGELIST, 'w') as f:
             print(f'Writing Edges to {EDGELIST}...')
-            f.write(','.join(['Source', 'Target', 'Label']) + '\n')
+            f.write(','.join(['Source', 'Target', 'Label', 'Move']) + '\n')
             for transition in self.source:
                 #print(transition)
                 s, read, write, dir_, dest = transition
@@ -207,9 +208,9 @@ class TM:
                             target = nodes[n]
                         else:
                             target = nodes[dest]
-                        f.write(','.join([nodes[n], target, edge_label]) + '\n')
+                        f.write(','.join([nodes[n], target, edge_label, MOVE[dir_]]) + '\n')
                 else:
-                    f.write(','.join([nodes[s], nodes[dest], edge_label]) + '\n')
+                    f.write(','.join([nodes[s], nodes[dest], edge_label, MOVE[dir_]]) + '\n')
 
 
 
