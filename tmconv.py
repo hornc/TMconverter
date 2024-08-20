@@ -209,6 +209,12 @@ class TM:
                         else:
                             target = nodes[dest]
                         f.write(','.join([nodes[n], target, edge_label, MOVE[dir_]]) + '\n')
+                #elif dest == '*':
+                #    for n in self.state:
+                #        f.write(','.join([nodes[s], nodes[n], edge_label, MOVE[dir_]]) + '\n')
+                elif dir_ == '*':
+                    for d in MOVE.values():
+                        f.write(','.join([nodes[s], nodes[dest], edge_label, d]) + '\n')
                 else:
                     f.write(','.join([nodes[s], nodes[dest], edge_label, MOVE[dir_]]) + '\n')
 
